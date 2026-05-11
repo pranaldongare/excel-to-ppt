@@ -8,7 +8,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from ppt_builder import REQUIRED_COLUMNS, build_presentation
+from ppt_builder import DEFAULT_TOP_TITLE, REQUIRED_COLUMNS, build_presentation
 
 
 st.set_page_config(page_title="Excel → PPT Worklet Generator", layout="wide")
@@ -20,6 +20,8 @@ with st.expander("Expected Excel columns", expanded=False):
     st.write("Your Excel must have these columns (header names must match exactly):")
     for col in REQUIRED_COLUMNS:
         st.markdown(f"- `{col}`")
+
+top_title = st.text_input("Top headline (appears on every slide)", value=DEFAULT_TOP_TITLE)
 
 uploaded = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
 
@@ -41,7 +43,10 @@ if uploaded is not None:
 
     if st.button("Generate PPT", type="primary"):
         with st.spinner("Generating presentation..."):
-            pptx_bytes = build_presentation(df.to_dict(orient="records"))
+            pptx_bytes = build_presentation(
+                df.to_dict(orient="records"),
+                top_title=top_title,
+            )
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.download_button(
             label="Download PPT",

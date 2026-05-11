@@ -52,7 +52,6 @@ COLOR_HEADER_BAR = RGBColor(0xB7, 0xE0, 0xEC)
 COLOR_PS_HEADER = RGBColor(0x2F, 0x55, 0x97)
 COLOR_EXP_HEADER = RGBColor(0x7F, 0x7F, 0x7F)
 COLOR_ACH_HEADER = RGBColor(0x54, 0x82, 0x35)
-COLOR_SCORE = RGBColor(0x5B, 0x9B, 0xD5)
 COLOR_WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 COLOR_BLACK = RGBColor(0x00, 0x00, 0x00)
 COLOR_LINK_BLUE = RGBColor(0x00, 0x70, 0xC0)
@@ -140,7 +139,15 @@ def _resolve(row: Dict[str, Any], spec: ColumnSpec) -> str:
     return str(row.get(spec, "")).strip()
 
 
-def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, ColumnSpec]) -> None:
+EXCLUDED_MENTOR_NAMES = {"samsung prism"}
+
+
+def _build_slide(
+    prs: Presentation,
+    row: Dict[str, Any],
+    mapping: Dict[str, ColumnSpec],
+    top_title: str,
+) -> None:
     slide = prs.slides.add_slide(prs.slide_layouts[6])
 
     header_title = _resolve(row, mapping["header_title"])
@@ -153,16 +160,14 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     achievements = _resolve(row, mapping["achievements"])
     remarks = _resolve(row, mapping["mentors_remarks"])
 
-    # Top title (static placeholder text)
-    _, tf = _add_textbox(slide, Inches(0.2), Inches(0.1), Inches(8.0), Inches(0.55))
-    _write_text(tf, "Excellent Worklets – Feb26-April26", size=24, bold=True)
+    mentors = [
+        m for m in (mentor1, mentor2)
+        if m and m.strip().lower() not in EXCLUDED_MENTOR_NAMES
+    ]
 
-    # Score circle (static placeholder)
-    circ = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(12.3), Inches(0.1), Inches(0.85), Inches(0.85))
-    _solid_fill(circ, COLOR_SCORE)
-    _hide_line(circ)
-    circ.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-    _write_text(circ.text_frame, "<Score>", size=11, bold=True, color=COLOR_WHITE, align=PP_ALIGN.CENTER)
+    # Top title (configurable per generation)
+    _, tf = _add_textbox(slide, Inches(0.2), Inches(0.1), Inches(13.0), Inches(0.55))
+    _write_text(tf, top_title, size=24, bold=True)
 
     # Light-blue header bar
     bar_left, bar_top = Inches(0.2), Inches(0.85)
@@ -179,15 +184,16 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     _write_lines(
         tf,
-        [f"College : {college}", f"Team- {team} Team"],
+        [f"College : {college}", f"Team- {team}"],
         size=14,
         bold=True,
     )
 
-    # Mentors (right side of bar)
-    _, tf = _add_textbox(slide, Inches(10.6), Inches(0.9), Inches(2.7), Inches(0.9))
+    # Mentors (right side of bar, right-aligned, "Samsung PRISM" filtered out)
+    _, tf = _add_textbox(slide, Inches(10.6), Inches(0.9), Inches(2.6), Inches(0.9))
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    _write_lines(tf, [mentor1, mentor2], size=12, bold=True)
+    tf.margin_right = Inches(0.1)
+    _write_lines(tf, mentors or [""], size=12, bold=True, align=PP_ALIGN.RIGHT)
 
     # Three top boxes
     box_top = Inches(1.95)
@@ -240,8 +246,10 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     _, tf = _add_textbox(slide, out_left + Inches(1.25), img_y + img_h + Inches(0.27), Inches(1.3), Inches(0.25))
     _write_text(tf, "<Forum>", size=10, align=PP_ALIGN.CENTER)
 
-    # Results label (no border, static placeholder)
-    _, tf = _add_textbox(slide, Inches(3.0), bot_top + Inches(0.05), Inches(5.7), Inches(0.4))
+    # Results box (matches Output / Mentors Remarks styling, body left as placeholder)
+    res_left, res_w = Inches(3.0), Inches(5.7)
+    _add_rounded_rect(slide, res_left, bot_top, res_w, bot_height, fill=None, line_color=COLOR_BLACK)
+    _, tf = _add_textbox(slide, res_left, bot_top + Inches(0.05), res_w, Inches(0.4))
     _write_text(tf, "Results", size=16, bold=True, align=PP_ALIGN.CENTER)
 
     # Mentors Remarks box (right, data-driven from "Mentor Final Remarks")
@@ -259,7 +267,14 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     _write_text(body_tf, remarks, size=12, bold=True)
 
 
-def build_presentation(rows: List[Dict[str, Any]], mapping: Dict[str, ColumnSpec] = None) -> bytes:
+DEFAULT_TOP_TITLE = "Excellent Worklets – Feb26-April26"
+
+
+def build_presentation(
+    rows: List[Dict[str, Any]],
+    mapping: Dict[str, ColumnSpec] = None,
+    top_title: str = DEFAULT_TOP_TITLE,
+) -> bytes:
     if mapping is None:
         mapping = DEFAULT_MAPPING
 
@@ -268,7 +283,7 @@ def build_presentation(rows: List[Dict[str, Any]], mapping: Dict[str, ColumnSpec
     prs.slide_height = Inches(7.5)
 
     for row in rows:
-        _build_slide(prs, row, mapping)
+        _build_slide(prs, row, mapping, top_title)
 
     out = io.BytesIO()
     prs.save(out)
