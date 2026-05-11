@@ -180,14 +180,14 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     _write_lines(
         tf,
         [f"College : {college}", f"Team- {team} Team"],
-        size=12,
+        size=14,
         bold=True,
     )
 
     # Mentors (right side of bar)
     _, tf = _add_textbox(slide, Inches(10.6), Inches(0.9), Inches(2.7), Inches(0.9))
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    _write_lines(tf, [mentor1, mentor2], size=11, bold=True)
+    _write_lines(tf, [mentor1, mentor2], size=12, bold=True)
 
     # Three top boxes
     box_top = Inches(1.95)
@@ -204,7 +204,7 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
         _add_rounded_rect(slide, left, box_top, box_w, box_height, fill=None, line_color=COLOR_BLACK)
         hdr = _add_rect(slide, left, box_top, box_w, header_height, fill=header_color)
         hdr.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-        _write_text(hdr.text_frame, label, size=14, bold=True, color=COLOR_WHITE, align=PP_ALIGN.CENTER)
+        _write_text(hdr.text_frame, label, size=16, bold=True, color=COLOR_WHITE, align=PP_ALIGN.CENTER)
 
         _, body_tf = _add_textbox(
             slide,
@@ -213,7 +213,7 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
             box_w - Inches(0.2),
             box_height - header_height - Inches(0.1),
         )
-        _write_text(body_tf, body, size=11)
+        _write_text(body_tf, body, size=12)
 
     # Bottom row
     bot_top = Inches(5.5)
@@ -222,8 +222,8 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     # Output box (left, static placeholders)
     out_left, out_w = Inches(0.2), Inches(2.7)
     _add_rounded_rect(slide, out_left, bot_top, out_w, bot_height, fill=None, line_color=COLOR_BLACK)
-    _, tf = _add_textbox(slide, out_left, bot_top + Inches(0.05), out_w, Inches(0.35))
-    _write_text(tf, "Output", size=12, bold=True, align=PP_ALIGN.CENTER)
+    _, tf = _add_textbox(slide, out_left, bot_top + Inches(0.05), out_w, Inches(0.4))
+    _write_text(tf, "Output", size=16, bold=True, align=PP_ALIGN.CENTER)
 
     img_w, img_h = Inches(0.7), Inches(0.85)
     img_y = bot_top + Inches(0.45)
@@ -241,22 +241,22 @@ def _build_slide(prs: Presentation, row: Dict[str, Any], mapping: Dict[str, Colu
     _write_text(tf, "<Forum>", size=10, align=PP_ALIGN.CENTER)
 
     # Results label (no border, static placeholder)
-    _, tf = _add_textbox(slide, Inches(3.0), bot_top + Inches(0.1), Inches(5.7), Inches(0.4))
-    _write_text(tf, "Results", size=14, bold=True, align=PP_ALIGN.CENTER)
+    _, tf = _add_textbox(slide, Inches(3.0), bot_top + Inches(0.05), Inches(5.7), Inches(0.4))
+    _write_text(tf, "Results", size=16, bold=True, align=PP_ALIGN.CENTER)
 
     # Mentors Remarks box (right, data-driven from "Mentor Final Remarks")
     rem_left, rem_w = Inches(8.9), Inches(4.3)
     _add_rounded_rect(slide, rem_left, bot_top, rem_w, bot_height, fill=None, line_color=COLOR_BLACK)
-    _, tf = _add_textbox(slide, rem_left, bot_top + Inches(0.05), rem_w, Inches(0.35))
-    _write_text(tf, "Mentors Remarks", size=12, bold=True, align=PP_ALIGN.CENTER)
+    _, tf = _add_textbox(slide, rem_left, bot_top + Inches(0.05), rem_w, Inches(0.4))
+    _write_text(tf, "Mentors Remarks", size=16, bold=True, align=PP_ALIGN.CENTER)
     _, body_tf = _add_textbox(
         slide,
         rem_left + Inches(0.1),
-        bot_top + Inches(0.45),
+        bot_top + Inches(0.5),
         rem_w - Inches(0.2),
-        bot_height - Inches(0.5),
+        bot_height - Inches(0.55),
     )
-    _write_text(body_tf, remarks, size=11, bold=True)
+    _write_text(body_tf, remarks, size=12, bold=True)
 
 
 def build_presentation(rows: List[Dict[str, Any]], mapping: Dict[str, ColumnSpec] = None) -> bytes:
